@@ -1,0 +1,25 @@
+{
+  "name": "api-server",
+  "version": "1.0.0",
+  "description": "backend api server",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "api",
+    "nodejs",
+    "server",
+    "backend",
+    "javascript"
+  ],
+  "author": "Indiro",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
