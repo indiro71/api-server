@@ -13,4 +13,8 @@ router.get('/stat', (req, res) => {
     res.send('stat');
 });
 
+router.get('/test', (req, res) => {
+    res.send('test');
+});
+
 module.exports = router;
