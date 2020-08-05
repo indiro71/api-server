@@ -9,4 +9,8 @@ router.get('/qr', (req, res) => {
     res.send('QR-codes');
 });
 
+router.get('/stat', (req, res) => {
+    res.send('stat');
+});
+
 module.exports = router;
