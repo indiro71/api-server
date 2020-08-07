@@ -1,24 +1,8 @@
-const {Router} = require('express');
-const router = Router();
+module.exports = function(app, db) {
+    app.get("/", function(req, res) {
+        res.redirect('index');
+    });
 
-router.get('/links', (req, res) => {
-    res.send('Short links');
-});
+    require("./dev/links")(app, db);
 
-router.get('/qr', (req, res) => {
-    res.send('QR-codes');
-});
-
-router.get('/stat', (req, res) => {
-    res.send('stat');
-});
-
-router.get('/test', (req, res) => {
-    res.send('test');
-});
-
-router.get('/test2', (req, res) => {
-    res.send('test2');
-});
-
-module.exports = router;
+};
