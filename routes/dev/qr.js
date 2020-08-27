@@ -11,17 +11,19 @@ router.options('*', (req, res) => {
 router.post('/getcode', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*')
     try {
+        const {text, firstColor, secondColor} = req.body;
         const opts = {
             errorCorrectionLevel: 'H',
             type: 'image/jpeg',
             quality: 0.3,
             margin: 1,
             color: {
-                dark:"#010599FF",
-                light:"#FFBF60FF"
-            }
+                dark: firstColor.hex,
+                light: secondColor.hex
+            },
+            width: 300,
+            height: 300
         }
-        const {text} = req.body;
         const link = await QRCode.toDataURL(text, opts);
         res.status(201).json({link});
     } catch (err) {
