@@ -1,7 +1,8 @@
 const {Router} = require('express');
 const router = Router();
 const needle = require('needle');
-const cheerio = require('cheerio')
+const cheerio = require('cheerio');
+const tunnel = require('tunnel');
 
 const Shop = require('../../models/scanprice/Shop');
 const Good = require('../../models/scanprice/Good');
@@ -26,8 +27,11 @@ router.get('!/addshop', async (req, res) => {
 
 router.get('/addgood', async (req, res) => {
     // const url = 'https://www.mvideo.ru/products/noutbuk-acer-aspire-3-a315-55g-53sk-nx-hnser-01c-30051126';
-    const url = 'https://www.ozon.ru/context/detail/id/161057183/';
+    const url = 'https://www.ozon.ru/context/detail/id/138355209/';
     const httpOptions = {};
+
+
+
 
     try {
         const shops = await Shop.find();
@@ -38,6 +42,14 @@ router.get('/addgood', async (req, res) => {
 
         if (shop) {
             if (shop.useCookie) {
+                const tunnelingAgent = tunnel.httpsOverHttp({
+                    proxy: {
+                        host: '95.174.67.50',
+                        port: 18080
+                    }
+                });
+                httpOptions.agent = tunnelingAgent;
+
                 needle.get(url, function(err, response){
                     if (err) throw err;
                     httpOptions.cookies = response.cookies;
@@ -50,13 +62,13 @@ router.get('/addgood', async (req, res) => {
 
                 const $ = cheerio.load(response.body);
                 const prices = shop.tagPrices.map(price => {
-                    return parseInt($(price).text().replace(/\s/g, '').match(/\d+/))
+                    if ($(price).text()) {
+                        return parseInt($(price).text().replace(/\s/g, '').match(/\d+/));
+                    }
+                }).filter(function(x) {
+                    return x !== undefined && x !== null;
                 });
                 const name = $(shop.tagName).text().replace(/\r?\n/g, "").trim();
-
-                console.log(prices.filter(function(x) {
-                    return x !== undefined && x !== null;
-                }));
 
                 const good = new Good({
                     name,
@@ -68,21 +80,25 @@ router.get('/addgood', async (req, res) => {
                     maxPrice:Math.min.apply(null, prices)
                 });
 
-                const candidate = await Good.findOne({name});
+                if (name) {
+                    const candidate = await Good.findOne({name});
 
-                if (candidate) {
-                    return res.status(422).json({error: 'Good already exists'});
+                    if (candidate) {
+                        return res.status(422).json({error: 'Good already exists'});
+                    }
+
+                    const dbGood = await good.save();
+                    const price = new Price({
+                        price:  Math.min.apply(null, prices),
+                        good: dbGood._id
+                    });
+
+                    await price.save();
+
+                    res.status(201).json({message: 'ok', status: response.status});
+                } else {
+                    return res.status(422).json({error: 'some error'});
                 }
-
-                const dbGood = await good.save();
-                const price = new Price({
-                    price:  Math.min.apply(null, prices),
-                    good: dbGood._id
-                });
-
-                await price.save();
-
-                res.status(201).json({message: 'ok', status: response.statusCode});
             });
         }
     } catch (e) {
@@ -116,5 +132,6 @@ router.get('/getpage', async (req, res) => {
         res.status(201).json({result, status: response.statusCode});
     });
 });
+
 
 module.exports = router;
