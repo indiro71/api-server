@@ -16,6 +16,9 @@ const shopSchema = new Schema({
     tagAvailable: {
         type: String
     },
+    tagImage: {
+        type: String
+    },
     tagName: {
         type: String,
         required: true
