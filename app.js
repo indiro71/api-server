@@ -3,6 +3,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require("passport");
+require('./cron/scanprice');
 
 const app = express();
 
