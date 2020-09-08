@@ -25,13 +25,11 @@ const shopSchema = new Schema({
     },
     methodRequest: {
         type: String,
-        default: 'GET',
-        required: true
+        default: 'GET'
     },
-    useCookie: {
+    useProxy: {
         type: Boolean,
-        default: false,
-        required: true
+        default: false
     },
     date: {
         type: Date,

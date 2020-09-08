@@ -4,11 +4,11 @@ const needle = require('needle');
 const Good = require('../models/scanprice/Good');
 const Price = require('../models/scanprice/Price');
 
-const {getShopByUrl, parseData} = require('../helpers/scanprice');
-const {setProxy} = require('../helpers/proxy');
+const { getShopByUrl, parseData } = require('../helpers/scanprice');
+const { setProxy } = require('../helpers/proxy');
 
 
-const scanPrice = new CronJob('0 * * * *', async function() {
+const scanPrice = new CronJob('0 * * * *', async function () {
     const httpOptions = {};
 
     try {
@@ -18,39 +18,42 @@ const scanPrice = new CronJob('0 * * * *', async function() {
             const url = dbGood.url;
             const shop = await getShopByUrl(url);
 
-            if (shop.useCookie) {
-                httpOptions.agent = setProxy();
-            }
-
-            needle.get(url, httpOptions, async function(err, response){
-                if (err || response.statusCode !== 200)
-                    throw err || response.statusCode;
-
-                const good = parseData(response.body, shop, url);
-
-                if (good) {
-                    if (good.currentPrice != dbGood.currentPrice) {
-                        const price = new Price({
-                            price:  good.currentPrice,
-                            good: dbGood._id
-                        });
-
-                        await price.save();
-
-                        dbGood.currentPrice = good.currentPrice;
-
-                        if (good.currentPrice < dbGood.minPrice) {
-                            dbGood.minPrice = good.currentPrice;
-                        }
-
-                        if (good.currentPrice > dbGood.maxPrice) {
-                            dbGood.maxPrice = good.currentPrice;
-                        }
-
-                        await dbGood.save();
-                    }
+            if (shop) {
+                if (shop.useProxy) {
+                    httpOptions.agent = setProxy();
                 }
-            });
+
+                needle.get(url, httpOptions, async function (err, response) {
+                    if (err || response.statusCode !== 200)
+                        throw err || response.statusCode;
+
+                    const good = parseData(response.body, shop, url);
+
+                    if (good) {
+                        if (good.currentPrice != dbGood.currentPrice) {
+                            const price = new Price({
+                                price: good.currentPrice,
+                                good: dbGood._id
+                            });
+
+                            await price.save();
+
+                            dbGood.currentPrice = good.currentPrice;
+                            dbGood.dateUpdate = Date.now;
+
+                            if (good.currentPrice < dbGood.minPrice) {
+                                dbGood.minPrice = good.currentPrice;
+                            }
+
+                            if (good.currentPrice > dbGood.maxPrice) {
+                                dbGood.maxPrice = good.currentPrice;
+                            }
+
+                            await dbGood.save();
+                        }
+                    }
+                });
+            }
         });
     } catch (e) {
         console.log(e)
