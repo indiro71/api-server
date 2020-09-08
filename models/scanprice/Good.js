@@ -28,12 +28,19 @@ const goodSchema = new Schema({
     maxPrice: {
         type: String
     },
+    image: {
+        type: String
+    },
     enabled: {
         type: Boolean,
         default: true,
         required: true
     },
-    date: {
+    dateCreate: {
+        type: Date,
+        default: Date.now
+    },
+    dateUpdate: {
         type: Date,
         default: Date.now
     }

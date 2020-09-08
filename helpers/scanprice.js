@@ -28,6 +28,7 @@ module.exports = {
         });
 
         const name = $(shop.tagName).text().replace(/\r?\n/g, "").trim();
+        const image = $(shop.tagImage).attr('src').replace(/\r?\n/g, "").trim();
 
         if (name) {
 
@@ -35,6 +36,7 @@ module.exports = {
                 name,
                 url: url,
                 shop: shop._id,
+                image,
                 available: prices.length > 0,
                 currentPrice: Math.min.apply(null, prices),
                 minPrice: Math.min.apply(null, prices),
