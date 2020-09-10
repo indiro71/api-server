@@ -11,15 +11,18 @@ const defaultDirectory = `images`;
 
 module.exports = {
     uploadFile(url, directory = defaultDirectory) {
-        const httpOptions = {};
-        const fileName = url.split('/').pop();
-        httpOptions.agent = setProxy();
+        const fileUrl = url.indexOf('https') !== -1 ? url : 'https:' + url;
 
-        needle.get(url, httpOptions, function (err, response) {
-            if (err || response.statusCode !== 200)
-                throw err || response.statusCode;
+        if (fileUrl.indexOf('https') !== -1) {
+            const httpOptions = {};
+            const fileName = fileUrl.split('/').pop();
+            httpOptions.agent = setProxy();
 
-            if (response.body && fileName) manager.uploadFile(response.body, `${storage}/${directory}/${fileName}`);
-        });
+            needle.get(fileUrl, httpOptions, function (err, response) {
+                if (err || response.statusCode !== 200)
+                    throw err || response.statusCode;
+                if (response.body && fileName) manager.uploadFile(response.body, `${storage}/${directory}/${fileName}`);
+            });
+        }
     }
 }

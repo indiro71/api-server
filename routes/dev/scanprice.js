@@ -13,6 +13,7 @@ const Price = require('../../models/scanprice/Price');
 router.options('*', (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Headers', 'Content-Type');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
     res.send('ok');
 });
 
@@ -20,7 +21,6 @@ router.get('/goods', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     try {
         const goods = await Good.find();
-
         res.status(201).json({ message: 'ok', goods });
     } catch (e) {
         return res.status(422).json({ error: 'goods not selected' });
@@ -42,25 +42,6 @@ router.get('/good/:id', async (req, res) => {
         });
     } catch (e) {
         return res.status(422).json({ error: 'not good' });
-    }
-});
-
-router.post('/addshop', async (req, res) => {
-    const { name, url, tagPrices, tagAvailable, tagName, tagImage } = req.body;
-    const shop = new Shop({
-        name,
-        url,
-        tagPrices,
-        tagAvailable,
-        tagName,
-        tagImage
-    });
-
-    try {
-        await shop.save();
-        res.status(201).json({ message: 'ok', status: 'shop added' });
-    } catch (e) {
-        return res.status(422).json({ error: 'Shop not added' });
     }
 });
 
@@ -112,6 +93,78 @@ router.post('/addgood', async (req, res) => {
         }
     } catch (e) {
         return res.status(422).json({ error: 'Good not added' });
+    }
+});
+
+router.delete('/good/:id', async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    try {
+        const good = await Good.findOneAndDelete({ _id: req.params.id });
+        const prices = await Price.deleteMany({ good: req.params.id });
+
+        res.status(201).json({
+            message: 'good was deleted'
+        });
+    } catch (e) {
+        return res.status(422).json({ error: 'not good' });
+    }
+});
+
+router.get('/shops', async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    try {
+        const shops = await Shop.find();
+        res.status(201).json({ message: 'ok', shops });
+    } catch (e) {
+        return res.status(422).json({ error: 'shop not selected' });
+    }
+});
+
+router.get('/shop/:id', async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    try {
+        const shop = await Shop.findById(req.params.id);
+        res.status(201).json({
+            message: 'ok', data: {
+                params: shop
+            }
+        });
+    } catch (e) {
+        return res.status(422).json({ error: 'not shop' });
+    }
+});
+
+router.post('/addshop', async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    const { name, url, tagPrices: stringPrice, tagAvailable, tagName, tagImage, useProxy } = req.body;
+    const tagPrices = stringPrice.split(',');
+    const shop = new Shop({
+        name,
+        url,
+        tagPrices,
+        tagAvailable,
+        tagName,
+        tagImage,
+        useProxy
+    });
+
+    try {
+        await shop.save();
+        res.status(201).json({ message: 'ok', status: 'shop added' });
+    } catch (e) {
+        return res.status(422).json({ error: 'Shop not added' });
+    }
+});
+
+router.delete('/shop/:id', async (req, res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    try {
+        const shop = await Shop.findOneAndDelete({ _id: req.params.id });
+        res.status(201).json({
+            message: 'shop was deleted'
+        });
+    } catch (e) {
+        return res.status(422).json({ error: 'not shop' });
     }
 });
 
