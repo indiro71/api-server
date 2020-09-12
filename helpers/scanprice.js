@@ -31,16 +31,15 @@ module.exports = {
         const image = $(shop.tagImage).attr('src').replace(/\r?\n/g, "").trim();
 
         if (name) {
-
             const good = {
                 name,
                 url: url,
                 shop: shop._id,
                 image,
                 available: prices.length > 0,
-                currentPrice: Math.min.apply(null, prices),
-                minPrice: Math.min.apply(null, prices),
-                maxPrice:Math.min.apply(null, prices)
+                currentPrice: prices.length > 0 ? Math.min.apply(null, prices): 0,
+                minPrice: prices.length > 0 ? Math.min.apply(null, prices): 0,
+                maxPrice: prices.length > 0 ? Math.min.apply(null, prices): 0
             };
 
             return good;

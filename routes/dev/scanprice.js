@@ -78,12 +78,15 @@ router.post('/addgood', async (req, res) => {
                     }
 
                     const dbGood = await good.save();
-                    const price = new Price({
-                        price: good.currentPrice,
-                        good: dbGood._id
-                    });
 
-                    await price.save();
+                    if (dbGood.currentPrice !== 0) {
+                        const price = new Price({
+                            price: good.currentPrice,
+                            good: dbGood._id
+                        });
+
+                        await price.save();
+                    }
 
                     res.status(201).json({ message: 'Good added', status: response.status });
                 } else {
