@@ -30,23 +30,26 @@ const scanPrice = new CronJob('0 * * * *', async function () {
                     const good = parseData(response.body, shop, url);
 
                     if (good) {
-                        if (good.currentPrice != dbGood.currentPrice) {
-                            const price = new Price({
-                                price: good.currentPrice,
-                                good: dbGood._id
-                            });
-
-                            await price.save();
-
+                        if (good.currentPrice !== dbGood.currentPrice) {
                             dbGood.currentPrice = good.currentPrice;
-                            dbGood.dateUpdate = Date.now;
+                            dbGood.dateUpdate = new Date().getTime();
+                            dbGood.available = good.available;
 
-                            if (good.currentPrice < dbGood.minPrice) {
-                                dbGood.minPrice = good.currentPrice;
-                            }
+                            if (good.currentPrice !== 0) {
+                                const price = new Price({
+                                    price: good.currentPrice,
+                                    good: dbGood._id
+                                });
 
-                            if (good.currentPrice > dbGood.maxPrice) {
-                                dbGood.maxPrice = good.currentPrice;
+                                await price.save();
+
+                                if (good.currentPrice < dbGood.minPrice) {
+                                    dbGood.minPrice = good.currentPrice;
+                                }
+
+                                if (good.currentPrice > dbGood.maxPrice) {
+                                    dbGood.maxPrice = good.currentPrice;
+                                }
                             }
 
                             await dbGood.save();
