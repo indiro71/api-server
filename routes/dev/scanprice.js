@@ -20,7 +20,7 @@ router.options('*', (req, res) => {
 router.get('/goods', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     try {
-        const goods = await Good.find();
+        const goods = await Good.find().populate('shop', 'name').select('name currentPrice url image');
         res.status(201).json({ message: 'ok', goods });
     } catch (e) {
         return res.status(422).json({ error: 'goods not selected' });
