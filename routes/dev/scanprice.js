@@ -30,7 +30,7 @@ router.get('/goods', async (req, res) => {
 router.get('/good/:id', async (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
     try {
-        const good = await Good.findById(req.params.id);
+        const good = await Good.findById(req.params.id).populate('shop', 'name');
         const prices = await Price.find().where('good').equals(req.params.id);
 
 
