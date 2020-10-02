@@ -21,6 +21,12 @@ module.exports = {
         const $ = cheerio.load(content);
         const prices = shop.tagPrices.map(price => {
             if ($(price).text()) {
+                if (shop.elementPrice) {
+                    if ($(price).text().indexOf(shop.elementPrice) !== -1) {
+                        return parseInt($(price).text().replace(/\s/g, '').match(/\d+/));
+                    }
+                    return null;
+                }
                 return parseInt($(price).text().replace(/\s/g, '').match(/\d+/));
             }
         }).filter(function(x) {

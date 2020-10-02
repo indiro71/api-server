@@ -19,6 +19,9 @@ const shopSchema = new Schema({
     tagImage: {
         type: String
     },
+    elementPrice: {
+        type: String
+    },
     tagName: {
         type: String,
         required: true
