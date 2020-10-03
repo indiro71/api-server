@@ -9,6 +9,14 @@ const instagramSchema = new Schema({
         type: String,
         required: true
     },
+    countSubscribe: {
+        type: Number,
+        default: 0
+    },
+    countUnSubscribe: {
+        type: Number,
+        default: 0
+    },
     date: {
         type: Date,
         default: Date.now
