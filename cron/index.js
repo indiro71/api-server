@@ -1,0 +1,2 @@
+require('./scanprice');
+require('./instagram');
