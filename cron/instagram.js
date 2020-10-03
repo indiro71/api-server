@@ -3,20 +3,17 @@ const CronJob = require('cron').CronJob;
 const Instagram = require('../models/Instagram');
 const inst = require('../helpers/instagram');
 
-const instagramBot = new CronJob('*/10 * * * *', async function () {
+const instagramBot = new CronJob('*/30 * * * *', async function () {
     try {
-        const accaunts = await Instagram.find();
+        const accounts = await Instagram.find();
 
-        accaunts.map(async accaunt => {
-            const name = accaunt.name;
-            const password = accaunt.password;
-
-            if (name) {
+        accounts.map(async ({ name, password, countSubscribe, countUnSubscribe }) => {
+            if (name && (countSubscribe || countUnSubscribe)) {
                 await inst.initialize();
                 await inst.login(name, password);
 
-                await inst.subscribe(20);
-                await inst.unsubscribe(name, 8);
+                if (countSubscribe) await inst.subscribe(countSubscribe);
+                if (countUnSubscribe) await inst.unsubscribe(name, countUnSubscribe);
 
                 await inst.close();
             }
