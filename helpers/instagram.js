@@ -8,10 +8,18 @@ const instagram = {
 
     initialize: async () => {
         instagram.browser = await puppeteer.launch({
-            headless: process.env.NODE_ENV === 'production'
+            headless: process.env.NODE_ENV === 'production',
+            args: [
+                '--no-sandbox',
+                '--lang=en-EN,en'
+            ]
         });
 
         instagram.page = await instagram.browser.newPage();
+
+        await instagram.page.setExtraHTTPHeaders({
+            'Accept-Language': 'en'
+        });
     },
 
     login: async (name, password) => {
@@ -41,7 +49,7 @@ const instagram = {
         await instagram.page.goto(`${BASE_URL}/${profile}/`);
         await instagram.page.waitForSelector('img[data-testid="user-avatar"]');
 
-        const subsButton = await instagram.page.$x('//a[text()[contains(.,"подписок")]]');
+        const subsButton = await instagram.page.$x('//a[text()[contains(.,"following")]]');
         await subsButton[0].click();
 
         await instagram.page.waitForSelector('div[role="presentation"]');
@@ -55,7 +63,7 @@ const instagram = {
             await button.click();
             await instagram.page.waitForSelector('div[role="presentation"]');
 
-            const unsubButton = await instagram.page.$x('//button[text()[contains(.,"Отменить подписку")]]');
+            const unsubButton = await instagram.page.$x('//button[text()[contains(.,"Unfollow")]]');
             await unsubButton[0].click();
         }
     },
