@@ -17,6 +17,9 @@ const instagramSchema = new Schema({
         type: Number,
         default: 0
     },
+    tagLikes: {
+        type: Array
+    },
     date: {
         type: Date,
         default: Date.now
