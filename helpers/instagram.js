@@ -139,22 +139,19 @@ const instagram = {
             await instagram.page.goto(`${BASE_URL}/explore/tags/${tag}/`);
             await instagram.page.waitForSelector("article > div img");
 
+            // const images = await instagram.page.$$('article div img[decoding="auto"]'); // top posts
+            const images = await instagram.page.$$('article>div:nth-child(3) img[decoding="auto"]');    //most recent posts
+
             for (let i = 0; i < count; i++) {
-                // const images = await instagram.page.$$('article div img[decoding="auto"]'); // top posts
-                const images = await instagram.page.$$('article>div:nth-child(3) img[decoding="auto"]');    //most recent posts
                 let image = images[i];
 
                 await image.click();
-                await instagram.page.waitForSelector("span svg[aria-label='Like']");
 
-                const isLiked = await instagram.page.$("span svg[aria-label='Like']");
-                if(isLiked) {
-                    await instagram.page.click("span svg[aria-label='Like']");
-                    await instagram.page.waitForSelector("span svg[aria-label='Unlike']");
-                }
+                await instagram.page.waitForSelector('button[aria-hidden="true"]');
+                await instagram.page.waitForSelector('span svg[aria-label="Like"]');
 
-                await instagram.page.click("svg[aria-label='Back']");
-                await instagram.page.waitForSelector("article > div img");
+                await instagram.page.click('span svg[aria-label="Like"]');
+                await instagram.page.click('button svg[aria-label="Close"]');
             }
         }
     },
