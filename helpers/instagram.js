@@ -22,11 +22,18 @@ const instagram = {
         options.args = [
             '--no-sandbox',
             '--lang=en-EN,en',
+            '--proxy-server=193.233.72.8:45785'
         ]
 
         instagram.browser = await puppeteer.launch(options);
 
         instagram.page = await instagram.browser.newPage();
+
+        await instagram.page.authenticate({
+            username: 'Selmickle',
+            password: 'B9t2ZoZ',
+        });
+
         await instagram.page.setExtraHTTPHeaders({
             'Accept-Language': 'en'
         });
@@ -39,11 +46,13 @@ const instagram = {
     login: async (name, password) => {
         await instagram.page.goto(`${BASE_URL}/accounts/login/?source=auth_switcher`, {waitUntil: 'networkidle2'});
 
+        await instagram.page.waitForSelector('input[name="username"]');
         await instagram.page.type('input[name="username"]', name, {delay: 10});
         await instagram.page.type('input[name="password"]', password, {delay: 10});
         await instagram.page.click('button[type="submit"]');
 
         await instagram.page.waitFor(5000);
+        await instagram.page.screenshot({path: 'afterLoginPage.png'});
     },
 
     subscribe: async (count = 5) => {
