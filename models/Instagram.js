@@ -20,6 +20,9 @@ const instagramSchema = new Schema({
     tagLikes: {
         type: Array
     },
+    countLikes: {
+        type: Number
+    },
     date: {
         type: Date,
         default: Date.now

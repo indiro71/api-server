@@ -22,11 +22,18 @@ const instagram = {
         options.args = [
             '--no-sandbox',
             '--lang=en-EN,en',
+            // '--proxy-server=IP:PORT'
         ]
 
         instagram.browser = await puppeteer.launch(options);
 
         instagram.page = await instagram.browser.newPage();
+
+        // await instagram.page.authenticate({
+        //     username: 'username',
+        //     password: 'password',
+        // });
+
         await instagram.page.setExtraHTTPHeaders({
             'Accept-Language': 'en'
         });
@@ -39,11 +46,13 @@ const instagram = {
     login: async (name, password) => {
         await instagram.page.goto(`${BASE_URL}/accounts/login/?source=auth_switcher`, {waitUntil: 'networkidle2'});
 
+        await instagram.page.waitForSelector('input[name="username"]');
         await instagram.page.type('input[name="username"]', name, {delay: 10});
         await instagram.page.type('input[name="password"]', password, {delay: 10});
         await instagram.page.click('button[type="submit"]');
 
         await instagram.page.waitFor(5000);
+        await instagram.page.screenshot({path: 'temp/afterLoginPage.png'});
     },
 
     subscribe: async (count = 5) => {
@@ -125,27 +134,23 @@ const instagram = {
 
     liked: async (tags = [], count = 9) => {
         if(tags.length === 0) return false;
-
         for(let tag of tags) {
             await instagram.page.goto(`${BASE_URL}/explore/tags/${tag}/`);
             await instagram.page.waitForSelector("article > div img");
 
+            // const images = await instagram.page.$$('article div img[decoding="auto"]'); // top posts
+            const images = await instagram.page.$$('article>div:nth-child(3) img[decoding="auto"]');    //most recent posts
+
             for (let i = 0; i < count; i++) {
-                // const images = await instagram.page.$$('article div img[decoding="auto"]'); // top posts
-                const images = await instagram.page.$$('article>div:nth-child(3) img[decoding="auto"]');    //most recent posts
                 let image = images[i];
 
                 await image.click();
-                await instagram.page.waitForSelector("span svg[aria-label='Like']");
 
-                const isLiked = await instagram.page.$("span svg[aria-label='Like']");
-                if(isLiked) {
-                    await instagram.page.click("span svg[aria-label='Like']");
-                    await instagram.page.waitForSelector("span svg[aria-label='Unlike']");
-                }
+                await instagram.page.waitForSelector('button[aria-hidden="true"]');
+                await instagram.page.waitForSelector('span svg[aria-label="Like"]');
 
-                await instagram.page.click("svg[aria-label='Back']");
-                await instagram.page.waitForSelector("article > div img");
+                await instagram.page.click('span svg[aria-label="Like"]');
+                await instagram.page.click('button svg[aria-label="Close"]');
             }
         }
     },
