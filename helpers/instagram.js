@@ -22,17 +22,17 @@ const instagram = {
         options.args = [
             '--no-sandbox',
             '--lang=en-EN,en',
-            '--proxy-server=193.233.72.8:45785'
+            // '--proxy-server=IP:PORT'
         ]
 
         instagram.browser = await puppeteer.launch(options);
 
         instagram.page = await instagram.browser.newPage();
 
-        await instagram.page.authenticate({
-            username: 'Selmickle',
-            password: 'B9t2ZoZ',
-        });
+        // await instagram.page.authenticate({
+        //     username: 'username',
+        //     password: 'password',
+        // });
 
         await instagram.page.setExtraHTTPHeaders({
             'Accept-Language': 'en'
@@ -52,7 +52,7 @@ const instagram = {
         await instagram.page.click('button[type="submit"]');
 
         await instagram.page.waitFor(5000);
-        await instagram.page.screenshot({path: 'afterLoginPage.png'});
+        await instagram.page.screenshot({path: 'temp/afterLoginPage.png'});
     },
 
     subscribe: async (count = 5) => {
@@ -134,7 +134,6 @@ const instagram = {
 
     liked: async (tags = [], count = 9) => {
         if(tags.length === 0) return false;
-
         for(let tag of tags) {
             await instagram.page.goto(`${BASE_URL}/explore/tags/${tag}/`);
             await instagram.page.waitForSelector("article > div img");
