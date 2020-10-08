@@ -1,32 +1,28 @@
 const CronJob = require('cron').CronJob;
-const needle = require('needle');
 const cheerio = require('cheerio');
 
-const Instastat = require('../models/Instastat');
+const Instagram = require('../models/Instagram');
+const Parser = require('../helpers/parser');
 
-const getInstaStat = new CronJob('0 23 * * *', async function () {
+const getInstaStat = new CronJob('10 20 * * *', async function () {
     try {
-        const accounts = await Instastat.find();
-        const httpOptions = {};
+        const accounts = await Instagram.find();
 
         for (let account of accounts) {
-            const userUrl = `https://www.instagram.com/${account.username}/`;
+            const userUrl = `https://www.instagram.com/${account.name}/`;
+            const parser = new Parser();
 
-            needle.get(userUrl, httpOptions, async function (err, response) {
-                if (err || response.statusCode !== 200)
-                    throw err || response.statusCode;
+            const content = await parser.getPageContent(userUrl);
+            const $ = cheerio.load(content);
+            const data = $('meta[name="description"]').attr('content').split(', ');
 
-                const $ = cheerio.load(response.body);
-                const data = $('meta[name="description"]').attr('content').split(', ');
+            const followers = parseInt(data[0]);
+            const following = parseInt(data[1]);
+            const posts = parseInt(data[2]);
+            const stats = { posts, followers, following, date: Date.now() };
 
-                const followers = parseInt(data[0]);
-                const following = parseInt(data[1]);
-                const posts = parseInt(data[2]);
-                const stats = { posts, followers, following, date: Date.now() };
-
-                account.stats.push(stats);
-                await account.save();
-            });
+            account.stats.push(stats);
+            await account.save();
         }
     } catch (e) {
         console.log(e)
