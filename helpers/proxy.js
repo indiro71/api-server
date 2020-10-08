@@ -4,8 +4,8 @@ module.exports = {
     setProxy() {
         const tunnelingAgent = tunnel.httpsOverHttp({
             proxy: {
-                host: '139.180.215.133',
-                port: 8888
+                host: '51.38.155.118',
+                port: 3128
             }
         });
 
