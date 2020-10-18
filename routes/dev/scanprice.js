@@ -55,7 +55,7 @@ router.post('/addgood', async (req, res) => {
 
         if (shop) {
             if (shop.useProxy) {
-                httpOptions.agent = setProxy();
+                httpOptions.agent = await setProxy();
             }
 
             needle.get(url, httpOptions, async function (err, response) {
@@ -66,7 +66,7 @@ router.post('/addgood', async (req, res) => {
 
                 if (data) {
                     if (data.image) {
-                        uploadFile(data.image);
+                        await uploadFile(data.image);
                         data.image = data.image.split('/').pop();
                     }
 

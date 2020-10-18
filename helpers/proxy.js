@@ -1,11 +1,13 @@
 const tunnel = require('tunnel');
+const { setting } = require('./setting');
 
 module.exports = {
-    setProxy() {
+    async setProxy() {
+        const ip = await setting('proxyIP');
         const tunnelingAgent = tunnel.httpsOverHttp({
             proxy: {
-                host: '51.38.155.118',
-                port: 3128
+                host: ip.split(':')[0],
+                port: ip.split(':')[1]
             }
         });
 
