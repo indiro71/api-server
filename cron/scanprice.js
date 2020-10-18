@@ -20,7 +20,7 @@ const scanPrice = new CronJob('0 * * * *', async function () {
 
             if (shop) {
                 if (shop.useProxy) {
-                    httpOptions.agent = setProxy();
+                    httpOptions.agent = await setProxy();
                 }
 
                 needle.get(url, httpOptions, async function (err, response) {

@@ -10,13 +10,13 @@ const storage = keys.STORAGE_NAME;
 const defaultDirectory = `images`;
 
 module.exports = {
-    uploadFile(url, directory = defaultDirectory) {
+    async uploadFile(url, directory = defaultDirectory) {
         const fileUrl = url.indexOf('https') !== -1 ? url : 'https:' + url;
 
         if (fileUrl.indexOf('https') !== -1) {
             const httpOptions = {};
             const fileName = fileUrl.split('/').pop();
-            httpOptions.agent = setProxy();
+            httpOptions.agent = await setProxy();
 
             needle.get(fileUrl, httpOptions, function (err, response) {
                 if (err || response.statusCode !== 200)
