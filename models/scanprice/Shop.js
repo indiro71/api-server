@@ -30,10 +30,6 @@ const shopSchema = new Schema({
         type: String,
         default: 'GET'
     },
-    useProxy: {
-        type: Boolean,
-        default: false
-    },
     date: {
         type: Date,
         default: Date.now

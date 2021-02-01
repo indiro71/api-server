@@ -34,7 +34,8 @@ module.exports = {
         });
 
         const name = $(shop.tagName).text().replace(/\r?\n/g, "").trim();
-        const image = $(shop.tagImage).attr('src').replace(/\r?\n/g, "").trim();
+        const imageTag = 'meta[property="'+ shop.tagImage + '"]';
+        const image = $(imageTag).attr('content').replace(/\r?\n/g, "");
 
         if (name) {
             const good = {
@@ -47,7 +48,6 @@ module.exports = {
                 minPrice: prices.length > 0 ? Math.min.apply(null, prices): 0,
                 maxPrice: prices.length > 0 ? Math.min.apply(null, prices): 0
             };
-
             return good;
         }
         return  null;

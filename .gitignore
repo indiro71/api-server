@@ -1,2 +1,7 @@
 node_modules
+logs
+temp
 keys/keys.dev.js
+logger.log
+more-logger.log
+.idea/

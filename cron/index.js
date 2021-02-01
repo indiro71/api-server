@@ -1,2 +1,1 @@
 require('./scanprice');
-// require('./instastat');

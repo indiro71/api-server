@@ -1,4 +1,4 @@
-const {Schema, model} = require('mongoose');
+const { Schema, model, Types } = require('mongoose');
 
 const instagramSchema = new Schema({
     name: {
@@ -33,10 +33,15 @@ const instagramSchema = new Schema({
     },
     private: {
         type: Boolean,
-        default: true
+        default: false
     },
     stats: {
         type: Array
+    },
+    user: {
+        type: Types.ObjectId,
+        ref: 'User',
+        unique: false
     },
     date: {
         type: Date,

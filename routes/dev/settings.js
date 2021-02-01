@@ -2,15 +2,7 @@ const { Router } = require('express');
 const router = Router();
 const Settings = require('../../models/Setting');
 
-router.options('*', (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Headers', 'Content-Type');
-    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-    res.send('ok');
-});
-
 router.get('/all', async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
     try {
         const settings = await Settings.find();
         res.status(201).json({ message: 'ok', settings });
@@ -20,7 +12,6 @@ router.get('/all', async (req, res) => {
 });
 
 router.post('/add', async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
     const { name, value, type } = req.body;
     const setting = new Settings({
         name,
@@ -37,7 +28,6 @@ router.post('/add', async (req, res) => {
 });
 
 router.get('/item/:id', async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
     try {
         const setting = await Settings.findById(req.params.id);
         res.status(201).json({
@@ -49,7 +39,6 @@ router.get('/item/:id', async (req, res) => {
 });
 
 router.put('/item/:id', async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
     const { name, value } = req.body;
     const setting = await Settings.findById(req.params.id);
     setting.name = name;
@@ -64,7 +53,6 @@ router.put('/item/:id', async (req, res) => {
 });
 
 router.delete('/delete/:id', async (req, res) => {
-    res.set('Access-Control-Allow-Origin', '*');
     try {
         await Settings.findOneAndDelete({ _id: req.params.id });
 
