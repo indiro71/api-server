@@ -1,1 +1,1 @@
-# moved to [bitbucket](https://bitbucket.org/indiro/api-server/)
+# indiro api server 
