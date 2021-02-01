@@ -2,9 +2,9 @@ const CronJob = require('cron').CronJob;
 const cheerio = require('cheerio');
 
 const Instagram = require('../models/Instagram');
-const Parser = require('../helpers/parser');
+const Parser = require('../helpers/instaParser');
 
-const getInstaStat = new CronJob('10 20 * * *', async function () {
+const getInstaStat = new CronJob('10 22 * * *', async function () {
     try {
         const accounts = await Instagram.find();
 
