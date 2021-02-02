@@ -5,7 +5,7 @@ const auth = require('../../middleware/auth');
 
 router.get('/list', async (req, res) => {
     try {
-        const accounts = await Instagram.find({ private:false }).select('name stats');
+        const accounts = await Instagram.find({ private: false }).select('name stats');
         res.status(201).json({ message: 'ok', accounts });
     } catch (e) {
         return res.status(422).json({ message: 'not accounts' });
@@ -15,10 +15,17 @@ router.get('/list', async (req, res) => {
 router.get('/account/:name', async (req, res) => {
     try {
         const account = await Instagram.findOne({ name: req.params.name }).select('name stats countSubscribe countUnSubscribe tagLikes countLikes active tested private user');
+        const userId = req.user ? req.user.id : '';
+        const canEdit = JSON.parse(JSON.stringify(account)).user === userId;
+
+        if (!canEdit && account.private) {
+            return res.status(422).json({ message: 'not account' });
+        }
+
         res.status(201).json({
             message: 'ok',
             account: {
-                canEdit: JSON.parse(JSON.stringify(account)).user === req.user.id,
+                canEdit,
                 ...JSON.parse(JSON.stringify(account))
             }
         });
@@ -45,8 +52,8 @@ router.post('/add', auth, async (req, res) => {
     }
 });
 
-router.put('/edit/:id', async (req, res) => {
-    const { password, countLikes, tagLikes, active, tested, private } = req.body;
+router.put('/edit/:id', auth, async (req, res) => {
+    const { password, countLikes, tagLikes, active, tested, private: privates } = req.body;
     const account = await Instagram.findById(req.params.id);
 
     if (account.user != req.user.id) {
@@ -58,13 +65,31 @@ router.put('/edit/:id', async (req, res) => {
     account.tagLikes = tagLikes.split(',').length > 0 ? tagLikes.split(',') : account.tagLikes;
     account.active = active;
     account.tested = tested;
-    account.private = private;
+    account.private = privates;
 
     try {
         await account.save();
         res.status(201).json({ message: 'account edit' });
     } catch (e) {
         return res.status(422).json({ message: 'account not edit' });
+    }
+});
+
+router.delete('/delete/:id', async (req, res) => {
+    try {
+        const account = await Instagram.findOne({ _id: req.params.id });
+
+        if (account.user != req.user.id) {
+            return res.status(422).json({ message: 'not authorized' });
+        }
+
+        await account.delete();
+
+        res.status(201).json({
+            message: 'account was deleted'
+        });
+    } catch (e) {
+        return res.status(422).json({ message: 'not account' });
     }
 });
 

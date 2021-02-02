@@ -1,5 +1,9 @@
 #CHANGE LOG
 
+## [1.0.3] - 2021-02-02
+### Changed
+- Refactor instagram interface
+
 ## [1.0.2] - 2020-11-29
 ### Added
  - Add Instagram bot
