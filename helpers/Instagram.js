@@ -1,4 +1,4 @@
-const log4js = require("log4js");
+const log4js = require('log4js');
 const puppeteer = require('puppeteer');
 const http = require('http');
 const fs = require('fs');
@@ -25,7 +25,7 @@ class Instagram {
         this.page = null;
         this.base_url = 'https://www.instagram.com';
         this.user_mobile_agent = 'Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36';
-        this.user_desctop_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36';
+        this.user_desktop_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36';
     }
 
     async initialize() {
@@ -33,12 +33,10 @@ class Instagram {
         const options = {};
         options.headless = this.headless;
 
-        if (this.mobile) {
-            options.defaultViewport = {
-                width: 320,
-                height: 570
-            }
-        }
+        options.defaultViewport = {
+            width: this.mobile ? 320 : 1920,
+            height: this.mobile ? 570 : 1080
+        };
 
         options.args = [
             '--no-sandbox',
@@ -46,16 +44,21 @@ class Instagram {
         ];
 
         if (this.useProxy) {
-            options.args.push('--proxy-server=194.116.163.69:45785');
+            options.args.push('--proxy-server=IP:PORT');
         }
 
         this.browser = await puppeteer.launch(options);
+
+        logger.info('init end');
+    }
+
+    async newPage() {
         this.page = await this.browser.newPage();
 
         if (this.useProxy) {
             await this.page.authenticate({
-                username: 'Selmickle',
-                password: 'B9t2ZoZ',
+                username: 'username',
+                password: 'pass',
             });
         }
 
@@ -66,13 +69,35 @@ class Instagram {
         if (this.mobile) {
             await this.page.setUserAgent(this.user_mobile_agent);
         } else {
-            await this.page.setUserAgent(this.user_desctop_agent);
+            await this.page.setUserAgent(this.user_desktop_agent);
         }
-        logger.info('init end');
+    }
+
+    async closePage() {
+        await this.page.close();
+    }
+
+    async setMobile() {
+        await this.page.setUserAgent(this.user_mobile_agent);
+        await this.page.setViewport({ width: 320, height: 570 });
+        await this.page.reload();
+        this.mobile = true;
+    }
+
+    async setDesktop() {
+        await this.page.setUserAgent(this.user_desktop_agent);
+        await this.page.setViewport({ width: 1920, height: 1080 });
+        await this.page.reload();
+        this.mobile = false;
+    }
+
+    async goTo(url) {
+        await this.page.goto(url, { waitUntil: 'networkidle2' });
     }
 
     async login() {
         logger.info('login start');
+        await this.newPage();
         try {
             if (this.name && this.password) {
                 await this.page.goto(`${this.base_url}/accounts/login/?source=auth_switcher`, { waitUntil: 'networkidle2' });
@@ -92,7 +117,6 @@ class Instagram {
             }
         } catch (e) {
             logger.info('login error', e);
-            await this.close();
         }
     }
 
@@ -111,7 +135,7 @@ class Instagram {
             }
         } catch (e) {
             console.log(e);
-            await this.close();
+            await this.closePage();
         }
     }
 
@@ -125,15 +149,15 @@ class Instagram {
             const subsButton = await this.page.$x('//a[text()[contains(.,"following")]]');
             await subsButton[0].click();
 
-            await this.page.waitForXPath("//button[contains(text(),'Following')]");
-            const buttons = await this.page.$x("//button[contains(text(),'Following')]");
+            await this.page.waitForXPath('//button[contains(text(),\'Following\')]');
+            const buttons = await this.page.$x('//button[contains(text(),\'Following\')]');
 
             for (let i = 0; i < this.countUnSubscribe; i++) {
                 let button = buttons[i];
 
                 await button.click();
-                await this.page.waitForXPath("//button[contains(text(),'Unfollow')]");
-                const unsubButton = await this.page.$x("//button[contains(text(),'Unfollow')]");
+                await this.page.waitForXPath('//button[contains(text(),\'Unfollow\')]');
+                const unsubButton = await this.page.$x('//button[contains(text(),\'Unfollow\')]');
                 await unsubButton[0].click();
             }
         } catch (e) {
@@ -147,95 +171,94 @@ class Instagram {
 
         try {
             await this.liked();
+            if (!this.mobile) await this.setMobile();
 
             const filePath = 'temp/newpost.jpg';
             const file = fs.createWriteStream(filePath);
-            const request = http.get(imgUrl.replace('https', 'http'), function(response) {
+            http.get(imgUrl.replace('https', 'http'), function (response) {
                 response.pipe(file);
             });
 
             await this.page.goto(`${this.base_url}/${this.name}/`);
             await this.page.waitForSelector('img[alt="Change Profile Photo"]');
 
-            await this.page.waitForSelector("input[type='file']");
+            await this.page.waitForSelector('input[type=\'file\']');
             let fileInputs = await this.page.$$('input[type="file"]');
-            let input = fileInputs[fileInputs.length-1];
+            let input = fileInputs[fileInputs.length - 1];
 
-            await this.page.click("[aria-label='New Post']");
+            await this.page.click('[aria-label=\'New Post\']');
             await this.page.waitFor(3000);
 
             await input.uploadFile(filePath);
             await this.page.waitFor(10000);
 
-            await this.page.waitForXPath("//button[contains(text(),'Next')]");
-            let next = await this.page.$x("//button[contains(text(),'Next')]");
+            await this.page.waitForXPath('//button[contains(text(),\'Next\')]');
+            let next = await this.page.$x('//button[contains(text(),\'Next\')]');
             await next[0].click();
 
             if (caption) {
-                await this.page.waitForSelector("textarea[aria-label='Write a caption…']");
-                await this.page.click("textarea[aria-label='Write a caption…']");
+                await this.page.waitForSelector('textarea[aria-label=\'Write a caption…\']');
+                await this.page.click('textarea[aria-label=\'Write a caption…\']');
                 await this.page.keyboard.type(caption);
             }
 
-            await this.page.waitForXPath("//button[contains(text(),'Share')]");
-            let share = await this.page.$x("//button[contains(text(),'Share')]");
+            await this.page.waitForXPath('//button[contains(text(),\'Share\')]');
+            let share = await this.page.$x('//button[contains(text(),\'Share\')]');
             await share[0].click();
 
             await this.page.waitFor(10000);
         } catch (e) {
             console.log(e);
-            await this.close();
+            await this.closePage();
         }
     }
 
-    async liked() {
+    async getLinks() {
         if (this.tagLikes.length === 0) return false;
-        await this.page.screenshot({ path: 'temp/beforeLike.png' });
+        if (this.mobile) await this.setDesktop();
+        await this.newPage();
 
         try {
+            const links = [];
             for (let tag of this.tagLikes) {
                 await this.page.goto(`${this.base_url}/explore/tags/${tag}/`);
-                await this.page.waitForSelector("article > div img");
+                await this.page.waitForSelector('article > div img');
 
                 await this.wait(2000, 10000);
 
-                // const images = await instagram.page.$$('article div img[decoding="auto"]'); // top posts
-                const images = await this.page.$$('article>div:nth-child(3) img[decoding="auto"]');    //most recent posts
-                let randomLikes = random.int(1, this.countLikes);
-                logger.info('Random likes count - ' + randomLikes);
-
-                for (let i = 0; i < randomLikes; i++) {
-                    let randomI = random.int(1, 3);
-                    let image = images[i + randomI];
-
-                    await image.click();
-
-                    await this.page.waitForSelector('button[aria-hidden="true"]');
-                    await this.page.waitForSelector('button svg[aria-label="Share Post"]');
-
-                    await this.wait(2000, 5000);
-
-                    if(random.int(1, 4) !== 1) {
-                        if (await this.page.$('span svg[aria-label="Like"]')) {
-                            await this.page.click('span svg[aria-label="Like"]');
-                        }
+                const pageLinks = await this.page.$$eval('article>div:nth-child(3) a', anchors => [].map.call(anchors, a => a.href));    //most recent posts
+                pageLinks.map((link, index) => {
+                    if (index < this.countLikes) {
+                        links.push(link)
                     }
+                });
 
-                    await this.wait(2000, 5000);
-
-                    if (await this.page.$('button svg[aria-label="Close"]')) {
-                        await this.page.click('button svg[aria-label="Close"]');
-                    } else {
-                        break;
-                    }
-
-                    await this.wait(2000, 5000);
-                }
             }
+
+            for (let i = 0; i < links.length; i++) {
+                let link = links[i];
+
+                await this.page.goto(link);
+                await this.page.waitForSelector('article > div img');
+
+                await this.wait(2000, 5000);
+
+                if (random.int(1, 7) !== 1) {
+                    if (await this.page.$('span svg[aria-label="Like"]')) {
+                        await this.page.click('span svg[aria-label="Like"]');
+                    }
+                }
+
+                await this.wait(2000, 7000);
+            }
+
             logger.info('Likes clicked');
             await this.page.screenshot({ path: 'temp/afterLike.png' });
+            await this.closePage();
         } catch (e) {
+            await this.page.screenshot({ path: 'temp/likesError.png' });
             logger.info('Likes error', e);
+            await this.closePage();
         }
     }
 
@@ -245,16 +268,90 @@ class Instagram {
         await this.page.waitFor(max > 0 ? random.int(min, max) : min);
     }
 
-    async close() {
-        await this.browser.close();
+    async goToTagPage(tag) {
+        try {
+            await this.page.type('input[placeholder="Search"]', `#${tag}`, { delay: 50 });
+            await this.wait(2000, 10000);
+
+            await this.page.keyboard.press('Enter');
+            await this.wait(2000, 10000);
+            await this.page.keyboard.press('Enter');
+            await this.page.waitForSelector('article > div img');
+
+            await this.wait(2000, 10000);
+        } catch (e) {
+            await this.page.screenshot({ path: 'temp/goToTagPage.png' });
+            logger.info('goToTagPage', e);
+        }
     }
 
-    async clickLikes() {
-        this.mobile = false;
-        await this.initialize();
-        await this.login();
-        await this.liked();
-        await this.close();
+    async likeTagImages() {
+        try {
+            // const images = await instagram.page.$$('article div img[decoding="auto"]'); // top posts
+            const images = await this.page.$$('article>div:nth-child(3) img[decoding="auto"]');    //most recent posts
+
+            for (let i = 0; i < this.countLikes; i++) {
+                let image = images[i];
+
+                await image.click();
+
+                await this.wait(2000, 5000);
+
+                // if (!await this.page.$('button[aria-hidden="true"]')) {
+                //     await this.page.screenshot({ path: 'temp/hiddenError(' + i + ').png' });
+                //     logger.error('Instagram error with button[aria-hidden="true"]');
+                //     break;
+                // }
+
+                // await this.wait(2000, 5000);
+
+                if (await this.page.$('button svg[aria-label="Close"]')) {
+                    if (random.int(1, 7) !== 1) {
+                        if (await this.page.$('span svg[aria-label="Like"]')) {
+                            await this.page.click('span svg[aria-label="Like"]');
+                        }
+                    }
+
+                    await this.wait(2000, 5000);
+
+                    await this.page.click('button svg[aria-label="Close"]');
+                } else {
+                    break;
+                }
+
+                await this.wait(2000, 5000);
+            }
+        } catch (e) {
+            await this.page.screenshot({ path: 'temp/likeTagImages.png' });
+            logger.info('likeTagImages', e);
+        }
+
+    }
+
+    async liked() {
+        if (this.tagLikes.length === 0) return false;
+        if (this.mobile) await this.setDesktop();
+
+        try {
+            for (let tag of this.tagLikes) {
+                await  this.goToTagPage(tag);
+
+                const date = new Date();
+                const hour = date.getHours();
+                if (hour > 8) {
+                    await this.likeTagImages();
+                }
+            }
+            logger.info('Likes clicked');
+            await this.page.screenshot({ path: 'temp/afterLike.png' });
+        } catch (e) {
+            await this.page.screenshot({ path: 'temp/likedError.png' });
+            logger.info('liked error', e);
+        }
+    }
+
+    async closeBrowser() {
+        await this.browser.close();
     }
 }
 
