@@ -109,13 +109,29 @@ class Instagram {
                 await this.page.type('input[name="password"]', this.password, { delay: 100 });
                 await this.page.click('button[type="submit"]');
 
-                await this.page.waitForXPath('//button[contains(text(),\'Save Info\')]');
+                await this.wait(5000);
+
+                try {
+                    if (await this.page.waitForXPath('//button[contains(text(),\'Not Now\')]')) {
+                        let notification = await this.page.$x('//button[contains(text(),\'Not Now\')]');
+                        await notification[0].click();
+                    }
+                } catch (e){}
+
+                try {
+                    if (await this.page.waitForXPath('//button[contains(text(),\'Save Info\')]')) {
+                        console.log('save info');
+                    }
+                } catch (e){}
+
                 await this.page.screenshot({ path: 'temp/afterLoginPage.png' });
                 logger.info('login end');
 
                 await this.wait(3000);
+                await this.closePage();
             }
         } catch (e) {
+            await this.closePage();
             logger.info('login error', e);
         }
     }
@@ -303,8 +319,6 @@ class Instagram {
                 //     break;
                 // }
 
-                // await this.wait(2000, 5000);
-
                 if (await this.page.$('button svg[aria-label="Close"]')) {
                     if (random.int(1, 7) !== 1) {
                         if (await this.page.$('span svg[aria-label="Like"]')) {
@@ -331,6 +345,8 @@ class Instagram {
     async liked() {
         if (this.tagLikes.length === 0) return false;
         if (this.mobile) await this.setDesktop();
+        await this.newPage();
+        await this.page.goto(`${this.base_url}`);
 
         try {
             for (let tag of this.tagLikes) {
@@ -344,6 +360,7 @@ class Instagram {
             }
             logger.info('Likes clicked');
             await this.page.screenshot({ path: 'temp/afterLike.png' });
+            await this.closePage();
         } catch (e) {
             await this.page.screenshot({ path: 'temp/likedError.png' });
             logger.info('liked error', e);
