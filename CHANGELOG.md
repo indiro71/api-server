@@ -1,5 +1,9 @@
 #CHANGE LOG
 
+## [1.0.4] - 2021-02-08
+### Added
+- Add tags functional
+
 ## [1.0.3] - 2021-02-02
 ### Changed
 - Refactor instagram interface

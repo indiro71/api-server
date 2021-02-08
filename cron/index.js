@@ -1,1 +1,2 @@
 require('./scanprice');
+require('./instastat');
