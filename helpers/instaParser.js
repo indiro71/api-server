@@ -13,6 +13,8 @@ const LAUNCH_PUPPETEER_OPTS = {
     ]
 };
 
+const user_desktop_agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36';
+
 const PAGE_PUPPETEER_OPTS = {
     networkIdle2Timeout: 5000,
     waitUntil: 'networkidle2',
@@ -36,6 +38,7 @@ class Parser {
 
         try {
             const page = await this.browser.newPage();
+            await page.setUserAgent(user_desktop_agent);
             await page.goto(url, PAGE_PUPPETEER_OPTS);
             const content = await page.content();
             await this.closeBrowser();

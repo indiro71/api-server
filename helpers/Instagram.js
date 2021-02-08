@@ -311,7 +311,8 @@ class Instagram {
 
                 await image.click();
 
-                await this.wait(2000, 5000);
+                await this.wait(10000, 20000);
+                await this.page.screenshot({ path: `temp/click-open-${i}.png` });
 
                 // if (!await this.page.$('button[aria-hidden="true"]')) {
                 //     await this.page.screenshot({ path: 'temp/hiddenError(' + i + ').png' });
@@ -323,17 +324,19 @@ class Instagram {
                     if (random.int(1, 7) !== 1) {
                         if (await this.page.$('span svg[aria-label="Like"]')) {
                             await this.page.click('span svg[aria-label="Like"]');
+                            await this.page.screenshot({ path: `temp/click-like-${i}.png` });
                         }
                     }
 
-                    await this.wait(2000, 5000);
+                    await this.wait(10000, 20000);
 
+                    await this.page.screenshot({ path: `temp/before-close-${i}.png` });
                     await this.page.click('button svg[aria-label="Close"]');
                 } else {
                     break;
                 }
 
-                await this.wait(2000, 5000);
+                await this.wait(10000, 20000);
             }
         } catch (e) {
             await this.page.screenshot({ path: 'temp/likeTagImages.png' });
