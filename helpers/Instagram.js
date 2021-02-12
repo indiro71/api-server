@@ -128,7 +128,6 @@ class Instagram {
                 logger.info('login end');
 
                 await this.wait(3000);
-                await this.closePage();
             }
         } catch (e) {
             await this.closePage();
@@ -182,16 +181,19 @@ class Instagram {
         }
     }
 
-    async postdata(imgUrl, caption = '') {
-        if (!imgUrl) return false;
+    async sharedPost(data) {
+        if (!data.imageUrl) return false;
+
+        for (let tag of this.tagLikes) {
+            await  this.goToTagPage(tag);
+        }
 
         try {
-            await this.liked();
             if (!this.mobile) await this.setMobile();
 
             const filePath = 'temp/newpost.jpg';
             const file = fs.createWriteStream(filePath);
-            http.get(imgUrl.replace('https', 'http'), function (response) {
+            http.get(data.imageUrl.replace('https', 'http'), function (response) {
                 response.pipe(file);
             });
 
@@ -212,10 +214,12 @@ class Instagram {
             let next = await this.page.$x('//button[contains(text(),\'Next\')]');
             await next[0].click();
 
-            if (caption) {
+            if (data.description) {
+                const tags = data.tags.map(tag => `#${tag}`);
+                const message = `${data.description}\n.\n.\n.\n.\n.\n${tags.join(' ')}`
                 await this.page.waitForSelector('textarea[aria-label=\'Write a caption…\']');
                 await this.page.click('textarea[aria-label=\'Write a caption…\']');
-                await this.page.keyboard.type(caption);
+                await this.page.keyboard.type(message);
             }
 
             await this.page.waitForXPath('//button[contains(text(),\'Share\')]');
@@ -354,12 +358,7 @@ class Instagram {
         try {
             for (let tag of this.tagLikes) {
                 await  this.goToTagPage(tag);
-
-                const date = new Date();
-                const hour = date.getHours();
-                if (hour > 8) {
-                    await this.likeTagImages();
-                }
+                await this.likeTagImages();
             }
             logger.info('Likes clicked');
             await this.page.screenshot({ path: 'temp/afterLike.png' });

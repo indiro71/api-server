@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const router = Router();
-const Instagram = require('../../models/Instagram');
+const Instagram = require('../../models/instagram/instagramProfiles');
 
 router.options('*', (req, res) => {
     res.set('Access-Control-Allow-Origin', '*');
