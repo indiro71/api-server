@@ -1,6 +1,6 @@
 {
   "name": "api-server",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "backend api server",
   "main": "app.js",
   "scripts": {
@@ -27,6 +27,7 @@
     "express-session": "^1.17.1",
     "jsonwebtoken": "^8.5.1",
     "log4js": "^6.3.0",
+    "moment": "^2.29.1",
     "mongoose": "^5.9.28",
     "needle": "^2.5.0",
     "node-selectel-manager": "^1.0.1",

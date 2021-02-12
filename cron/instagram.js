@@ -1,41 +1,70 @@
 const CronJob = require('cron').CronJob;
 const random = require('random');
 const log4js = require("log4js");
-const Instagram = require('../models/Instagram');
+const moment = require("moment");
+const Instagram = require('../models/instagram/instagramProfiles');
+const Post = require('../models/instagram/instagramPosts');
 const instagram = require('../helpers/Instagram');
 const logger = log4js.getLogger('instaCron');
 
 
 const initInst = async () => {
-    const acc = await Instagram.findOne().where('active').equals(true);
-    if (acc) {
-        const inst = new instagram(acc, false);
+    let worked = false;
 
-        await inst.initialize();
-        await inst.login();
+    new CronJob('0 */3 * * *', async function () {
+        const acc = await Instagram.findOne({active: true});
 
-        // await uploadLocalFile('/temp/afterLoginPage.png', 'instagram');
-        logger.info('Instagram init');
+        if (acc && !worked) {
+            const inst = new instagram(acc, false);
 
-        let worked = false;
-
-        new CronJob('*/12 * * * *', async function () {
             try {
-                const randomInt = random.int(0, 8);
-                logger.info('Instagram random init - ' + randomInt);
-                if (randomInt === 5 && !worked) {
+                await inst.initialize();
+                await inst.login();
+                if (!worked) {
                     worked = true;
                     logger.info('Start like clicked');
                     await inst.liked();
+                    await inst.closeBrowser();
                     worked = false;
-                    // await uploadLocalFile('/temp/afterLike.png', 'instagram');
-                    // await uploadLocalFile('/temp/beforeLike.png', 'instagram');
                 }
             } catch (e) {
                 logger.error('Instagram error', e);
             }
-        }, null, true, 'Europe/Moscow');
-    }
+        }
+
+    }, null, true, 'Europe/Moscow');
+
+    new CronJob('58 */12 * * *', async function () {
+        const acc = await Instagram.findOne({active: true});
+
+        if (acc && !worked) {
+            try {
+                worked = true;
+                logger.info('Start post shared');
+
+                const post = await Post.findOne({profileId: acc._id, active: true, published: false, datePublish: moment().format('L')});
+                if (post) {
+                    const inst = new instagram(acc, false);
+                    await inst.initialize();
+                    await inst.login();
+                    await inst.sharedPost(post);
+                    await inst.closeBrowser();
+
+                    post.published = true;
+                    await post.save();
+                }
+
+                worked = false;
+                logger.info('Finish post shared');
+            } catch (e) {
+                logger.error('Instagram error', e);
+            }
+        }
+    }, null, true, 'Europe/Moscow');
+
+
+
+
 }
 
 module.exports = initInst;

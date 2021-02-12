@@ -1,7 +1,7 @@
 const CronJob = require('cron').CronJob;
 const cheerio = require('cheerio');
 
-const Instagram = require('../models/Instagram');
+const Instagram = require('../models/instagram/instagramProfiles');
 const Parser = require('../helpers/instaParser');
 
 const getInstaStat = new CronJob('10 22 * * *', async function () {
