@@ -34,7 +34,7 @@ const initInst = async () => {
 
     }, null, true, 'Europe/Moscow');
 
-    new CronJob('58 */12 * * *', async function () {
+    new CronJob('50 */12 * * *', async function () {
         const acc = await Instagram.findOne({active: true});
 
         if (acc && !worked) {
