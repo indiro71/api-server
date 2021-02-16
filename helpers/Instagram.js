@@ -186,6 +186,7 @@ class Instagram {
 
         for (let tag of this.tagLikes) {
             await  this.goToTagPage(tag);
+            await this.likeTagImages();
         }
 
         try {
@@ -226,7 +227,7 @@ class Instagram {
             let share = await this.page.$x('//button[contains(text(),\'Share\')]');
             await share[0].click();
 
-            await this.page.waitFor(10000);
+            await this.page.waitFor(30000);
         } catch (e) {
             console.log(e);
             await this.closePage();
