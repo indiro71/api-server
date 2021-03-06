@@ -1,5 +1,10 @@
 #CHANGE LOG
 
+## [1.0.6] - 2021-03-07
+### Added
+- Add geoLocation api
+- Add weather api
+
 ## [1.0.5] - 2021-02-13
 ### Added
 - Add instagram posts functional

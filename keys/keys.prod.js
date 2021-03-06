@@ -7,4 +7,6 @@ module.exports = {
     STORAGE_LOGIN: process.env.STORAGE_LOGIN,
     STORAGE_PASSWORD: process.env.STORAGE_PASSWORD,
     STORAGE_NAME: process.env.STORAGE_NAME,
+    LOCATION_API_KEY: process.env.LOCATION_API_KEY,
+    WEATHER_API_KEY: process.env.WEATHER_API_KEY
 }
