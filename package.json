@@ -1,6 +1,6 @@
 {
   "name": "api-server",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "backend api server",
   "main": "app.js",
   "scripts": {
@@ -30,6 +30,7 @@
     "moment": "^2.29.1",
     "mongoose": "^5.9.28",
     "needle": "^2.5.0",
+    "node-fetch": "^2.6.1",
     "node-selectel-manager": "^1.0.1",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
