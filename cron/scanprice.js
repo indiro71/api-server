@@ -6,49 +6,52 @@ const Price = require('../models/scanprice/Price');
 
 const { getShopByUrl, parseData } = require('../helpers/scanprice');
 
-const scanPrice = new CronJob('0 * * * *', async function () {
+const scanPrice = new CronJob('0 */6 * * *', async function () {
     try {
         const dbGoods = await Good.find();
+        const parser = new Parser();
 
         for (const dbGood of dbGoods) {
             const url = dbGood.url;
             const shop = await getShopByUrl(url);
 
             if (shop) {
-                const parser = new Parser();
-                const content =  await parser.getPageContent(url);
-                const good = parseData(content, shop, url);
-
-                if (good) {
-                    if (+good.currentPrice !== +dbGood.currentPrice) {
-                        if (good.available) {
-                            dbGood.currentPrice = good.currentPrice;
-                        }
-                        dbGood.dateUpdate = new Date().getTime();
-                        dbGood.available = good.available;
-
-                        if (+good.currentPrice !== 0) {
-                            const price = new Price({
-                                price: good.currentPrice,
-                                good: dbGood._id
-                            });
-
-                            await price.save();
-
-                            if (good.currentPrice < dbGood.minPrice) {
-                                dbGood.minPrice = good.currentPrice;
+                try {
+                    const content =  await parser.getPageContent(url);
+                    const good = parseData(content, shop, url);
+                    if (good) {
+                        if (+good.currentPrice !== +dbGood.currentPrice) {
+                            if (good.available) {
+                                dbGood.currentPrice = good.currentPrice;
                             }
+                            dbGood.dateUpdate = new Date().getTime();
+                            dbGood.available = good.available;
 
-                            if (good.currentPrice > dbGood.maxPrice) {
-                                dbGood.maxPrice = good.currentPrice;
+                            if (+good.currentPrice !== 0) {
+                                const price = new Price({
+                                    price: good.currentPrice,
+                                    good: dbGood._id
+                                });
+
+                                await price.save();
+
+                                if (good.currentPrice < dbGood.minPrice) {
+                                    dbGood.minPrice = good.currentPrice;
+                                }
+
+                                if (good.currentPrice > dbGood.maxPrice) {
+                                    dbGood.maxPrice = good.currentPrice;
+                                }
                             }
+                            await dbGood.save();
                         }
-
-                        await dbGood.save();
                     }
+                } catch (e) {
+                    await parser.closeBrowser();
                 }
             }
         }
+        await parser.closeBrowser();
     } catch (e) {
         console.log(e)
     }
