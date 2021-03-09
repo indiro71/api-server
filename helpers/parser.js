@@ -4,7 +4,7 @@ const LAUNCH_PUPPETEER_OPTS = {
     headless: true,
     args: [
         '--no-sandbox',
-        '--window-size=1920,1080',
+        '--window-size=320,570',
         '--lang=en-EN,en',
     ]
 };
@@ -26,7 +26,7 @@ class Parser {
 
         try {
             const page = await this.browser.newPage();
-            await page.setUserAgent('Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36');
+            await page.setUserAgent('Mozilla/5.0 (Linux; Android 8.0.0; SM-G960F Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36');
             // await page.goto(url, { waitUntil: 'load' });
             await page.goto(url, { waitUntil: 'domcontentloaded' });
             const content = await page.content();
