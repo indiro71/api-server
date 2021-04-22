@@ -10,44 +10,48 @@ const scanPrice = new CronJob('0 * * * *', async function () {
     try {
         const dbGoods = await Good.find();
 
-        for (const dbGood of dbGoods) {
-            const url = dbGood.url;
-            const shop = await getShopByUrl(url);
+        if (dbGoods) {
+            const parser = new Parser();
 
-            if (shop) {
-                const parser = new Parser();
-                const content =  await parser.getPageContent(url);
-                const good = parseData(content, shop, url);
+            for (const dbGood of dbGoods) {
+                const url = dbGood.url;
+                const shop = await getShopByUrl(url);
 
-                if (good) {
-                    if (+good.currentPrice !== +dbGood.currentPrice) {
-                        if (good.available) {
-                            dbGood.currentPrice = good.currentPrice;
-                        }
-                        dbGood.dateUpdate = new Date().getTime();
-                        dbGood.available = good.available;
+                if (shop) {
+                    const content =  await parser.getPageContent(url);
+                    const good = parseData(content, shop, url);
 
-                        if (+good.currentPrice !== 0) {
-                            const price = new Price({
-                                price: good.currentPrice,
-                                good: dbGood._id
-                            });
+                    if (good) {
+                        if (good.currentPrice !== dbGood.currentPrice && good.currentPrice !== 0) {
+                            if (good.available) {
+                                dbGood.currentPrice = good.currentPrice;
+                            }
+                            dbGood.dateUpdate = new Date().getTime();
+                            dbGood.available = good.available;
 
-                            await price.save();
+                            if (good.currentPrice !== 0) {
+                                const price = new Price({
+                                    price: good.currentPrice,
+                                    good: dbGood._id
+                                });
 
-                            if (good.currentPrice < dbGood.minPrice) {
-                                dbGood.minPrice = good.currentPrice;
+                                await price.save();
+
+                                if (good.currentPrice < dbGood.minPrice) {
+                                    dbGood.minPrice = good.currentPrice;
+                                }
+
+                                if (good.currentPrice > dbGood.maxPrice) {
+                                    dbGood.maxPrice = good.currentPrice;
+                                }
                             }
 
-                            if (good.currentPrice > dbGood.maxPrice) {
-                                dbGood.maxPrice = good.currentPrice;
-                            }
+                            await dbGood.save();
                         }
-
-                        await dbGood.save();
                     }
                 }
             }
+            await parser.closeBrowser();
         }
     } catch (e) {
         console.log(e)
