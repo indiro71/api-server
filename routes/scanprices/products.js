@@ -42,6 +42,7 @@ router.post('/add', async (req, res) => {
         if (shop) {
             const parser = new Parser();
             const content = await parser.getPageContent(url);
+            await parser.closeBrowser();
             const data = parseData(content, shop, url);
 
             if (data) {

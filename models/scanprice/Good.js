@@ -20,13 +20,13 @@ const goodSchema = new Schema({
         required: true
     },
     currentPrice: {
-        type: String
+        type: Number
     },
     minPrice: {
-        type: String
+        type: Number
     },
     maxPrice: {
-        type: String
+        type: Number
     },
     image: {
         type: String
