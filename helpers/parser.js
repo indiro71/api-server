@@ -1,4 +1,6 @@
 const puppeteer = require('puppeteer');
+const log4js = require("log4js");
+const logger = log4js.getLogger('parser');
 
 class Parser {
     constructor(mobile = true, tested = false) {
@@ -72,7 +74,8 @@ class Parser {
             const content =  await this.page.content();
             await this.closePage();
             return content;
-        } catch (err) {
+        } catch (e) {
+            logger.error('Parser error', e);
             await this.closeBrowser();
         }
     }
