@@ -7,12 +7,11 @@ const Price = require('../models/scanprice/Price');
 const { getShopByUrl, parseData } = require('../helpers/scanprice');
 
 const scanPrice = new CronJob('0 * * * *', async function () {
+    const parser = new Parser();
     try {
         const dbGoods = await Good.find();
 
         if (dbGoods) {
-            const parser = new Parser();
-
             for (const dbGood of dbGoods) {
                 const url = dbGood.url;
                 const shop = await getShopByUrl(url);
@@ -45,7 +44,6 @@ const scanPrice = new CronJob('0 * * * *', async function () {
                                     dbGood.maxPrice = good.currentPrice;
                                 }
                             }
-
                             await dbGood.save();
                         }
                     }
@@ -54,6 +52,7 @@ const scanPrice = new CronJob('0 * * * *', async function () {
             await parser.closeBrowser();
         }
     } catch (e) {
+        await parser.closeBrowser();
         console.log(e)
     }
 }, null, true, 'Europe/Moscow');
