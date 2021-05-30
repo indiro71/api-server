@@ -35,7 +35,10 @@ module.exports = {
 
         const name = $(shop.tagName).text().replace(/\r?\n/g, "").trim();
         const imageTag = 'meta[property="'+ shop.tagImage + '"]';
-        const image = $(imageTag).attr('content').replace(/\r?\n/g, "");
+        let image = $(imageTag).attr('content');
+        if (image) {
+            image = image.replace(/\r?\n/g, "");
+        }
 
         if (name) {
             const good = {
