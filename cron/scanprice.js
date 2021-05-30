@@ -8,7 +8,7 @@ const Price = require('../models/scanprice/Price');
 
 const { getShopByUrl, parseData } = require('../helpers/scanprice');
 
-const scanPrice = new CronJob('0 * * * *', async function () {
+const scanPrice = new CronJob('*/2 * * * *', async function () {
     const parser = new Parser();
     try {
         const dbGoods = await Good.find();
@@ -19,43 +19,47 @@ const scanPrice = new CronJob('0 * * * *', async function () {
                 const shop = await getShopByUrl(url);
 
                 if (shop) {
-                    const content =  await parser.getPageContent(url);
-                    const good = parseData(content, shop, url);
+                    try {
+                        const content =  await parser.getPageContent(url);
+                        const good = parseData(content, shop, url);
 
-                    if (good) {
-                        if (good.currentPrice !== dbGood.currentPrice && good.currentPrice !== 0) {
-                            if (good.available) {
-                                dbGood.currentPrice = good.currentPrice;
-                            }
-                            dbGood.dateUpdate = new Date().getTime();
-                            dbGood.available = good.available;
-
-                            if (good.currentPrice !== 0) {
-                                const price = new Price({
-                                    price: good.currentPrice,
-                                    good: dbGood._id
-                                });
-
-                                await price.save();
-
-                                if (good.currentPrice < dbGood.minPrice) {
-                                    dbGood.minPrice = good.currentPrice;
+                        if (good) {
+                            if (good.currentPrice !== dbGood.currentPrice && good.currentPrice !== 0) {
+                                if (good.available) {
+                                    dbGood.currentPrice = good.currentPrice;
                                 }
+                                dbGood.dateUpdate = new Date().getTime();
+                                dbGood.available = good.available;
 
-                                if (good.currentPrice > dbGood.maxPrice) {
-                                    dbGood.maxPrice = good.currentPrice;
+                                if (good.currentPrice !== 0) {
+                                    const price = new Price({
+                                        price: good.currentPrice,
+                                        good: dbGood._id
+                                    });
+
+                                    await price.save();
+
+                                    if (good.currentPrice < dbGood.minPrice) {
+                                        dbGood.minPrice = good.currentPrice;
+                                    }
+
+                                    if (good.currentPrice > dbGood.maxPrice) {
+                                        dbGood.maxPrice = good.currentPrice;
+                                    }
                                 }
+                                await dbGood.save();
                             }
-                            await dbGood.save();
                         }
+                    } catch (e) {
+                        logger.error('Scanprices cron error', url, e);
                     }
+
                 }
             }
             await parser.closeBrowser();
         }
     } catch (e) {
         await parser.closeBrowser();
-        logger.error('Scanprices cron error', e);
     }
 }, null, true, 'Europe/Moscow');
 
