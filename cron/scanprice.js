@@ -1,4 +1,6 @@
 const CronJob = require('cron').CronJob;
+const log4js = require("log4js");
+const logger = log4js.getLogger('scanprice');
 const Parser = require('../helpers/parser');
 
 const Good = require('../models/scanprice/Good');
@@ -53,7 +55,7 @@ const scanPrice = new CronJob('0 * * * *', async function () {
         }
     } catch (e) {
         await parser.closeBrowser();
-        console.log(e)
+        logger.error('Scanprices cron error', e);
     }
 }, null, true, 'Europe/Moscow');
 
