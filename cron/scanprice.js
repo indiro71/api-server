@@ -8,7 +8,7 @@ const Price = require('../models/scanprice/Price');
 
 const { getShopByUrl, parseData } = require('../helpers/scanprice');
 
-const scanPrice = new CronJob('*/2 * * * *', async function () {
+const scanPrice = new CronJob('0 * * * *', async function () {
     const parser = new Parser();
     try {
         const dbGoods = await Good.find();
@@ -22,7 +22,6 @@ const scanPrice = new CronJob('*/2 * * * *', async function () {
                     try {
                         const content =  await parser.getPageContent(url);
                         const good = parseData(content, shop, url);
-
                         if (good) {
                             if (good.currentPrice !== dbGood.currentPrice && good.currentPrice !== 0) {
                                 if (good.available) {
@@ -51,6 +50,7 @@ const scanPrice = new CronJob('*/2 * * * *', async function () {
                             }
                         }
                     } catch (e) {
+                        await parser.closeBrowser();
                         logger.error('Scanprices cron error', url, e);
                     }
 
