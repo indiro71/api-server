@@ -52,7 +52,11 @@ class Parser {
         }
     }
 
-    closeBrowser() {
+    async closePage() {
+        await this.page.close();
+    }
+
+    async closeBrowser() {
         this.browser.close();
     }
     async getPageContent(url) {
@@ -65,9 +69,11 @@ class Parser {
             // await this.wait(3000);
             await this.page.goto(url, { waitUntil: 'domcontentloaded' });
             // await this.wait(5000);
-            return await this.page.content();
+            const content =  await this.page.content();
+            await this.closePage();
+            return content;
         } catch (err) {
-            throw err;
+            await this.closeBrowser();
         }
     }
 }
