@@ -309,7 +309,8 @@ class Instagram {
     async likeTagImages() {
         try {
             // const images = await instagram.page.$$('article div img[decoding="auto"]'); // top posts
-            const images = await this.page.$$('article>div:nth-child(3) img[decoding="auto"]');    //most recent posts
+            const images = await this.page.$$('article div:nth-child(2) img[crossorigin="anonymous"]');    //most recent posts
+            if (!images) return;
 
             for (let i = 0; i < this.countLikes; i++) {
                 let image = images[i];
