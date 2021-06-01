@@ -21,6 +21,8 @@ const scanPrice = new CronJob('0 * * * *', async function () {
                 if (shop) {
                     try {
                         const content =  await parser.getPageContent(url);
+                        if (!content) return;
+
                         const good = parseData(content, shop, url);
                         if (good) {
                             if (good.currentPrice !== dbGood.currentPrice && good.currentPrice !== 0) {

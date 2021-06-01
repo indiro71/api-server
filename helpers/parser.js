@@ -70,7 +70,7 @@ class Parser {
             await this.newPage();
             // await this.wait(3000);
             await this.page.goto(url, { waitUntil: 'domcontentloaded' });
-            // await this.wait(5000);
+            await this.wait(3000);
             return await this.page.content();
         } catch (e) {
             logger.error('Parser error', e);
