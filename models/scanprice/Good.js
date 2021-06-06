@@ -14,6 +14,11 @@ const goodSchema = new Schema({
         ref: 'Shop',
         required: true
     },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        unique: false
+    },
     available: {
         type: Boolean,
         default: false,
