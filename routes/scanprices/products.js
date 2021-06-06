@@ -9,6 +9,8 @@ const auth = require('../../middleware/auth');
 const Good = require('../../models/scanprice/Good');
 const Price = require('../../models/scanprice/Price');
 const Subscribe = require('../../models/scanprice/Subscribe');
+const keys = require('../../keys');
+const { sendMessage } = require('../../helpers/api/sendgrid');
 
 router.get('/all', async (req, res) => {
     try {
@@ -138,6 +140,14 @@ router.post('/add', auth, async (req, res) => {
                 await subscribe.save();
             }
 
+            const msg = {
+                to: req.user.email,
+                from: keys.EMAIL_FROM, // Change to your verified sender
+                subject: 'Add new product',
+                text: `Product ${dbGood.name} successful added on site`,
+                html: `Product <b>${dbGood.name}</b> successful added on site`,
+            }
+            sendMessage(msg);
             res.status(201).json({ message: 'Product added', id: dbGood._id });
         } else {
             return res.status(422).json({ error: 'some error' });
