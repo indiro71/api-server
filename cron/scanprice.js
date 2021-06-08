@@ -5,6 +5,7 @@ const Parser = require('../helpers/parser');
 
 const Good = require('../models/scanprice/Good');
 const Price = require('../models/scanprice/Price');
+const { checkSubscribes } = require('../helpers/scanprice');
 
 const { getShopByUrl, parseData } = require('../helpers/scanprice');
 
@@ -48,7 +49,11 @@ const scanPrice = new CronJob('0 * * * *', async function () {
                                         dbGood.maxPrice = good.currentPrice;
                                     }
                                 }
-                                await dbGood.save();
+                                const updatedGood = await dbGood.save();
+
+                                if (good.currentPrice <= dbGood.currentPrice) {
+                                    await checkSubscribes(updatedGood);
+                                }
                             }
                         }
                     } catch (e) {

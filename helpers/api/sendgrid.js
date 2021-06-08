@@ -1,7 +1,6 @@
 const keys = require('../../keys');
 const sgMail = require('@sendgrid/mail');
 
-
 module.exports = {
     async sendMessage(msg) {
         sgMail.setApiKey(keys.SENDGRID_API_KEY);
