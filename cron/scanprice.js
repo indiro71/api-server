@@ -29,6 +29,11 @@ const scanPrice = new CronJob('0 * * * *', async function () {
                             if (good.currentPrice !== dbGood.currentPrice && good.currentPrice !== 0) {
                                 if (good.available) {
                                     dbGood.currentPrice = good.currentPrice;
+
+                                    if (good.currentPrice < dbGood.currentPrice) {
+                                        logger.error('checkSubscribes', 'yes');
+                                        await checkSubscribes(dbGood, good.currentPrice);
+                                    }
                                 }
                                 dbGood.dateUpdate = new Date().getTime();
                                 dbGood.available = good.available;
@@ -49,11 +54,8 @@ const scanPrice = new CronJob('0 * * * *', async function () {
                                         dbGood.maxPrice = good.currentPrice;
                                     }
                                 }
-                                const updatedGood = await dbGood.save();
 
-                                if (good.currentPrice <= dbGood.currentPrice) {
-                                    await checkSubscribes(updatedGood);
-                                }
+                                await dbGood.save();
                             }
                         }
                     } catch (e) {
