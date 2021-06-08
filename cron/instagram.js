@@ -1,5 +1,4 @@
 const CronJob = require('cron').CronJob;
-const random = require('random');
 const log4js = require("log4js");
 const moment = require("moment");
 const Instagram = require('../models/instagram/instagramProfiles');
