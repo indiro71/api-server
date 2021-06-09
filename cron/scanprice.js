@@ -29,7 +29,7 @@ const scanPrice = new CronJob('0 * * * *', async function () {
                             if (good.currentPrice !== dbGood.currentPrice && good.currentPrice !== 0) {
                                 if (good.available) {
                                     if (good.currentPrice < dbGood.currentPrice) {
-                                        await checkSubscribes(dbGood, good.currentPrice);
+                                        await checkSubscribes({...dbGood}, good.currentPrice);
                                     }
                                     dbGood.currentPrice = good.currentPrice;
                                 }
