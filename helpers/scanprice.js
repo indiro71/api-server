@@ -68,7 +68,7 @@ module.exports = {
         try {
             const subscribes = await Subscribe.find().where('good').equals(product._id);
             for (const subscribe of subscribes) {
-                if (subscribe.price <= price) {
+                if (price <= subscribe.price) {
                     const user = await User.findById(subscribe.user);
                     const msg = {
                         to: user.email,
