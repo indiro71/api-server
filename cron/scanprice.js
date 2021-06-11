@@ -29,7 +29,7 @@ const scanPrice = new CronJob('0 * * * *', async function () {
                             if (good.currentPrice !== dbGood.currentPrice && good.currentPrice !== 0) {
                                 if (good.available) {
                                     if (good.currentPrice < dbGood.currentPrice) {
-                                        await checkSubscribes({...dbGood}, good.currentPrice);
+                                        await checkSubscribes(dbGood, good.currentPrice);
                                     }
                                     dbGood.currentPrice = good.currentPrice;
                                 }
@@ -66,6 +66,7 @@ const scanPrice = new CronJob('0 * * * *', async function () {
             await parser.closeBrowser();
         }
     } catch (e) {
+        logger.error('Scanprices cron error all', e);
         await parser.closeBrowser();
     }
 }, null, true, 'Europe/Moscow');
