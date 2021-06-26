@@ -36,7 +36,7 @@ async function start() {
         const PORT = process.env.PORT || 7171;
         app.listen(PORT, () => {
             if (process.env.NODE_ENV === 'production') {
-                /initInst();
+                //initInst();
             }
             console.log(`Server running on port ${PORT}...`);
         });
