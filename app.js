@@ -6,7 +6,7 @@ const cors = require('cors');
 
 const userMiddleware = require('./middleware/user');
 const { MONGODB_URI } = require('./keys');
-const initInst = require("./cron/instagram");
+// const initInst = require("./cron/instagram");
 
 require('./cron/');
 const app = express();
@@ -36,7 +36,7 @@ async function start() {
         const PORT = process.env.PORT || 7171;
         app.listen(PORT, () => {
             if (process.env.NODE_ENV === 'production') {
-                initInst();
+                /initInst();
             }
             console.log(`Server running on port ${PORT}...`);
         });

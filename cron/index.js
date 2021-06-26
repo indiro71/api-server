@@ -1,2 +1,2 @@
-require('./scanprice');
-require('./instastat');
+// require('./scanprice');
+// require('./instastat');
